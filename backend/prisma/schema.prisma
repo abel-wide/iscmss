@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum Role {
+  ADMIN
+  REGISTRAR
+  HEAD
+  TEACHER
+  ROOM_TEACHER
+  PARENT
+  STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  FAILED
+}
+
+// ==========================================
+// USER & AUTH
+// ==========================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  teacher   Teacher?
+  student   Student?
+  parent    Parent?
+  registrar Registrar?
+  admin     Admin?
+  auditLogs AuditLog[]
+
+  @@index([role])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Registrar {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// ACADEMIC STRUCTURE
+// ==========================================
+
+model Class {
+  id            String   @id @default(uuid())
+  name          String
+  gradeLevel    Int
+  academicYear  String
+  roomTeacherId String?  @unique
+  roomTeacher   Teacher? @relation("RoomTeacher", fields: [roomTeacherId], references: [id])
+  
+  students      Student[]
+  attendances   Attendance[]  // <-- አዲስ የተጨመረ
+  timetables    Timetable[]
+  createdAt     DateTime @default(now())
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  marks       Mark[]
+  timetables  Timetable[]
+  createdAt   DateTime @default(now())
+}
+
+model Timetable {
+  id        String  @id @default(uuid())
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  dayOfWeek Int
+  startTime String
+  endTime   String
+}
+
+// ==========================================
+// ACTORS
+// ==========================================
+
+model Teacher {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualification    String?
+  subjectSpecialty String?
+  createdAt        DateTime @default(now())
+
+  roomTeacherOf Class?       @relation("RoomTeacher")
+  marks         Mark[]
+  resources     Resource[]
+}
+
+model Student {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentCode String   @unique
+  dateOfBirth DateTime
+  gender      Gender
+  
+  classId     String?
+  class       Class?   @relation(fields: [classId], references: [id])
+  parentId    String?
+  parent      Parent?  @relation(fields: [parentId], references: [id])
+  
+  createdAt   DateTime @default(now())
+
+  attendances Attendance[]
+  marks       Mark[]
+  payments    Payment[]
+  academicResults AcademicResult[]
+
+  @@index([classId])
+}
+
+model Parent {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  relationship String?
+  createdAt    DateTime  @default(now())
+
+  students     Student[]
+  notifications Notification[]
+}
+
+// ==========================================
+// ACADEMIC DATA
+// ==========================================
+
+model Attendance {
+  id        String           @id @default(uuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  classId   String
+  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade) // <-- አዲስ የተጨመረ
+  
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  method    String
+  markedBy  String
+  createdAt DateTime         @default(now())
+
+  @@unique([studentId, date])
+  @@index([classId, date])
+}
+
+model Mark {
+  id           String   @id @default(uuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId    String
+  subject      Subject  @relation(fields: [subjectId], references: [id])
+  teacherId    String
+  teacher      Teacher  @relation(fields: [teacherId], references: [id])
+  
+  assessment   Float
+  finalExam    Float
+  total        Float
+  createdAt    DateTime @default(now())
+
+  @@unique([studentId, subjectId])
+}
+
+model AcademicResult {
+  id           String   @id @default(uuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYear String
+  semester     Int
+  gpa          Float?
+  rank         Int?
+  generatedAt  DateTime @default(now())
+}
+
+// ==========================================
+// FINANCE & PAYMENTS
+// ==========================================
+
+model Payment {
+  id            String        @id @default(uuid())
+  studentId     String
+  student       Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount        Decimal       @db.Decimal(10, 2)
+  status        PaymentStatus @default(PENDING)
+  dueDate       DateTime
+  paidAt        DateTime?
+  receiptNo     String?       @unique
+  transactionId String?
+  createdAt     DateTime      @default(now())
+
+  @@index([studentId])
+}
+
+// ==========================================
+// COMMUNICATION & NOTIFICATIONS
+// ==========================================
+
+model Notification {
+  id           String   @id @default(uuid())
+  recipientId  String
+  parent       Parent?  @relation(fields: [recipientId], references: [id])
+  title        String
+  message      String   @db.Text
+  type         String
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  authorId  String
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// LEARNING HUB
+// ==========================================
+
+model Resource {
+  id          String   @id @default(uuid())
+  title       String
+  type        String
+  url         String
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  createdAt   DateTime @default(now())
+}
