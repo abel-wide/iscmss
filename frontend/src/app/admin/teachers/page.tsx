@@ -64,7 +64,7 @@ export default function TeachersPage() {
       await api.post('/users/teachers', { ...form, password: form.password || 'Teacher@1234' });
       setForm({ email: '', password: '', fullName: '' });
       setShowForm(false);
-      fetchTeachers(); // አሁን በ useCallback ስለተገለጸ ምንም ስህተት አይሰጥም
+      fetchTeachers();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
       alert(error.response?.data?.message || 'Error occurred');
@@ -85,6 +85,17 @@ export default function TeachersPage() {
     <div className="min-h-screen bg-slate-100 p-8">
       <div className="max-w-7xl mx-auto">
         <Button variant="outline" onClick={() => router.push('/admin')}>← Back</Button>
+
+        {/* Learning Hub action */}
+        <div className="mt-4 mb-6">
+          <Button
+            onClick={() => router.push('/teacher/resources')}
+            className="h-24 text-lg w-full"
+          >
+            Learning Hub
+          </Button>
+        </div>
+
         <div className="flex justify-between items-center mt-4 mb-6">
           <h1 className="text-2xl font-bold">Teachers</h1>
           <Button onClick={() => setShowForm(!showForm)}>+ Add Teacher</Button>
