@@ -63,6 +63,10 @@ model User {
   admin     Admin?
   auditLogs AuditLog[]
 
+  // Chat Relations (አዲስ የተጨመሩ)
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
   @@index([role])
 }
 
@@ -107,7 +111,7 @@ model Class {
   roomTeacher   Teacher? @relation("RoomTeacher", fields: [roomTeacherId], references: [id])
   
   students      Student[]
-  attendances   Attendance[]  // <-- አዲስ የተጨመረ
+  attendances   Attendance[]
   timetables    Timetable[]
   createdAt     DateTime @default(now())
 }
@@ -193,7 +197,7 @@ model Attendance {
   student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   
   classId   String
-  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade) // <-- አዲስ የተጨመረ
+  class     Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
   
   date      DateTime         @db.Date
   status    AttendanceStatus
@@ -274,6 +278,23 @@ model Announcement {
   authorId  String
   expiresAt DateTime?
   createdAt DateTime @default(now())
+}
+
+// ==========================================
+// CHAT (COMMUNICATION HUB) - አዲስ የተጨመረ
+// ==========================================
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, receiverId])
 }
 
 // ==========================================
