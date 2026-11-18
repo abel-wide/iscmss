@@ -11,6 +11,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { GradesModule } from './grades/grades.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ResourcesModule } from './resources/resources.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -23,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     GradesModule,
     PaymentsModule,
     NotificationsModule,
+    ResourcesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
