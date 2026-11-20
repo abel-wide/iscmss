@@ -22,7 +22,7 @@ export class GradesController {
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
   findAllMarks(
     @Query('studentId') studentId?: string,
     @Query('subjectId') subjectId?: string,
@@ -31,9 +31,15 @@ export class GradesController {
   }
 
   @Get('student/:studentId')
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
   findStudentMarks(@Param('studentId', ParseUUIDPipe) studentId: string) {
     return this.gradesService.findStudentMarks(studentId);
+  }
+
+  @Get('report-card/:studentId')
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
+  generateReportCard(@Param('studentId', ParseUUIDPipe) studentId: string) {
+    return this.gradesService.generateReportCard(studentId);
   }
 
   @Patch(':id')

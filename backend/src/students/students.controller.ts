@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -6,7 +6,7 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '@prisma/client';
+import { Gender, Role } from '@prisma/client';
 
 @ApiTags('Students')
 @ApiBearerAuth()
@@ -22,13 +22,17 @@ export class StudentsController {
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
-  findAllStudents() {
-    return this.studentsService.findAllStudents();
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
+  findAllStudents(
+    @Query('search') search?: string,
+    @Query('classId') classId?: string,
+    @Query('gender') gender?: Gender,
+  ) {
+    return this.studentsService.findAllStudents(search, classId, gender);
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
   findOneStudent(@Param('id', ParseUUIDPipe) id: string) {
     return this.studentsService.findOneStudent(id);
   }

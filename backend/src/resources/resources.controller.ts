@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Param, UseGuards, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ResourcesService } from './resources.service';
 import { CreateResourceDto } from './dto/create-resource.dto';
@@ -21,13 +21,16 @@ export class ResourcesController {
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.TEACHER, Role.PARENT, Role.STUDENT, Role.ROOM_TEACHER)
-  findAllResources() {
-    return this.resourcesService.findAllResources();
+  @Roles(Role.ADMIN, Role.HEAD, Role.TEACHER, Role.PARENT, Role.STUDENT, Role.ROOM_TEACHER)
+  findAllResources(
+    @Query('type') type?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.resourcesService.findAllResources(type, search);
   }
 
   @Get('teacher/:teacherId')
-  @Roles(Role.ADMIN, Role.TEACHER, Role.PARENT, Role.STUDENT, Role.ROOM_TEACHER)
+  @Roles(Role.ADMIN, Role.HEAD, Role.TEACHER, Role.PARENT, Role.STUDENT, Role.ROOM_TEACHER)
   findResourcesByTeacher(@Param('teacherId', ParseUUIDPipe) teacherId: string) {
     return this.resourcesService.findResourcesByTeacher(teacherId);
   }

@@ -191,7 +191,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-slate-800 mt-12 pt-8 text-sm text-center text-slate-500">
-            © {new Date().getFullYear()} ISCMS. All rights reserved.
+            © 2026 ISCMS. All rights reserved.
           </div>
         </div>
       </footer>

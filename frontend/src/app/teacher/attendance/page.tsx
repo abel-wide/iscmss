@@ -25,9 +25,10 @@ export default function AttendancePage() {
   const [selectedClass, setSelectedClass] = useState('');
   const [students, setStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<Record<string, string>>({});
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState('');
 
   useEffect(() => {
+    setDate(new Date().toISOString().split('T')[0]);
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');

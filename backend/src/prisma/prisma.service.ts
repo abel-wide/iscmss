@@ -1,3 +1,8 @@
+import 'dotenv/config';
+import * as dns from 'node:dns';
+
+dns.setDefaultResultOrder('ipv4first');
+
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';

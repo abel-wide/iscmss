@@ -75,15 +75,34 @@ export default function TeacherDashboard() {
           <Button variant="destructive" onClick={handleLogout}>Logout</Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Button onClick={() => router.push('/teacher/attendance')} className="h-24 text-lg">
-            Take Attendance
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 flex items-center gap-3">
+          <span className="text-xl">📋</span>
+          <div>
+            <p className="font-semibold text-sm">Attendance Policy Notice</p>
+            <p className="text-xs text-amber-700">Per institutional policy, daily student attendance can only be marked by the designated Room Teacher assigned to that class (or an Admin override).</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <Button onClick={() => router.push('/teacher/attendance')} className="h-20 text-base flex flex-col items-center justify-center gap-1">
+            <span>📅</span>
+            <span>Take Attendance</span>
           </Button>
-          <Button onClick={() => router.push('/teacher/grades')} className="h-24 text-lg">
-            Enter Grades
+          <Button onClick={() => router.push('/teacher/grades')} className="h-20 text-base flex flex-col items-center justify-center gap-1">
+            <span>📝</span>
+            <span>Enter Grades</span>
           </Button>
-          <Button onClick={() => router.push('/teacher/students')} className="h-24 text-lg">
-            View Students
+          <Button onClick={() => router.push('/teacher/timetable')} variant="outline" className="h-20 text-base flex flex-col items-center justify-center gap-1 bg-white">
+            <span>🗓️</span>
+            <span>Class Timetable</span>
+          </Button>
+          <Button onClick={() => router.push('/teacher/resources')} variant="outline" className="h-20 text-base flex flex-col items-center justify-center gap-1 bg-white">
+            <span>📚</span>
+            <span>Resources</span>
+          </Button>
+          <Button onClick={() => router.push('/teacher/students')} variant="outline" className="h-20 text-base flex flex-col items-center justify-center gap-1 bg-white">
+            <span>👥</span>
+            <span>Students</span>
           </Button>
         </div>
 

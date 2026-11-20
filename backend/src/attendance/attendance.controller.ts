@@ -29,8 +29,18 @@ export class AttendanceController {
     return this.attendanceService.markBulkAttendance(dto, userId);
   }
 
+  @Get('reports')
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
+  getAttendanceReport(
+    @Query('classId') classId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.attendanceService.getAttendanceReport(classId, startDate, endDate);
+  }
+
   @Get()
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER)
   findAllAttendances(
     @Query('classId') classId?: string,
     @Query('date') date?: string,
@@ -39,7 +49,7 @@ export class AttendanceController {
   }
 
   @Get('student/:studentId')
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.TEACHER, Role.ROOM_TEACHER, Role.PARENT, Role.STUDENT)
   findStudentAttendance(@Param('studentId', ParseUUIDPipe) studentId: string) {
     return this.attendanceService.findStudentAttendance(studentId);
   }
@@ -49,8 +59,9 @@ export class AttendanceController {
   updateAttendance(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAttendanceDto,
+    @CurrentUser('userId') userId: string,
   ) {
-    return this.attendanceService.updateAttendance(id, dto);
+    return this.attendanceService.updateAttendance(id, dto, userId);
   }
 
   @Delete(':id')

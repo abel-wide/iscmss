@@ -22,8 +22,14 @@ export class PaymentsController {
     return this.paymentsService.createPayment(dto);
   }
 
+  @Post('reminders')
+  @Roles(Role.ADMIN, Role.REGISTRAR)
+  dispatchReminders() {
+    return this.paymentsService.dispatchReminders();
+  }
+
   @Get()
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.PARENT)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.PARENT)
   findAllPayments(
     @Query('studentId') studentId?: string,
     @Query('status') status?: PaymentStatus,
@@ -32,13 +38,19 @@ export class PaymentsController {
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.REGISTRAR, Role.PARENT)
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.PARENT)
   findOnePayment(@Param('id', ParseUUIDPipe) id: string) {
     return this.paymentsService.findOnePayment(id);
   }
 
+  @Get(':id/receipt')
+  @Roles(Role.ADMIN, Role.HEAD, Role.REGISTRAR, Role.PARENT, Role.STUDENT)
+  getReceipt(@Param('id', ParseUUIDPipe) id: string) {
+    return this.paymentsService.getReceipt(id);
+  }
+
   @Post(':id/pay')
-  @Roles(Role.PARENT, Role.ADMIN) // ወላጅ ወይም አድሚን ክፍያ ማድረግ ይችላሉ
+  @Roles(Role.PARENT, Role.ADMIN)
   makePayment(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: MakePaymentDto,
@@ -47,7 +59,7 @@ export class PaymentsController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.REGISTRAR)
   updatePayment(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePaymentDto,

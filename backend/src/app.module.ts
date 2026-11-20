@@ -12,6 +12,12 @@ import { GradesModule } from './grades/grades.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ResourcesModule } from './resources/resources.module';
+import { ChatModule } from './chat/chat.module';
+import { TimetableModule } from './timetable/timetable.module';
+import { ReportsModule } from './reports/reports.module';
+import { SearchModule } from './search/search.module';
+import { ExamsModule } from './exams/exams.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -25,6 +31,11 @@ import { ResourcesModule } from './resources/resources.module';
     PaymentsModule,
     NotificationsModule,
     ResourcesModule,
+    ChatModule,
+    TimetableModule,
+    ReportsModule,
+    SearchModule,
+    ExamsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

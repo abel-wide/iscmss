@@ -2,8 +2,9 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { Role } from '@prisma/client';
+import { Gender, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { assertStrongPassword } from '../common/utils/password-policy';
 
 @Injectable()
 export class StudentsService {
@@ -11,7 +12,7 @@ export class StudentsService {
 
   // 1. አዲስ ተማሪ መመዝገብ
   async createStudent(dto: CreateStudentDto) {
-    // ኢሜል ወይም የተማሪ ኮድ ቀድሞ መኖሩን አረጋግጥ
+    assertStrongPassword(dto.password);
     const existingEmail = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existingEmail) throw new ConflictException('Email already in use');
 
@@ -20,7 +21,6 @@ export class StudentsService {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    // User እና Student በአንድ ጊዜ መፍጠር (Transaction)
     return this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
@@ -52,20 +52,33 @@ export class StudentsService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
-        studentId: student.id, // <-- ይህ ለ PATCH/DELETE ያገለግላል
+        studentId: student.id,
         studentCode: student.studentCode,
       };
     });
   }
 
-  // 2. ሁሉንም ተማሪዎች ማየት
-  async findAllStudents() {
+  // 2. ተማሪዎችን በፍለጋና ማጣሪያ ማየት (Search by Name, Code, Class, Gender)
+  async findAllStudents(search?: string, classId?: string, gender?: Gender) {
+    const where: any = {};
+    if (classId) where.classId = classId;
+    if (gender) where.gender = gender;
+    if (search) {
+      where.OR = [
+        { studentCode: { contains: search, mode: 'insensitive' } },
+        { user: { fullName: { contains: search, mode: 'insensitive' } } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
     return this.prisma.student.findMany({
+      where,
       include: {
         user: { select: { id: true, email: true, fullName: true, phone: true, isActive: true } },
-        class: { select: { id: true, name: true } },
-        parent: { include: { user: { select: { fullName: true } } } },
+        class: { select: { id: true, name: true, gradeLevel: true } },
+        parent: { include: { user: { select: { fullName: true, phone: true } } } },
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -77,35 +90,33 @@ export class StudentsService {
         user: { select: { id: true, email: true, fullName: true, phone: true, isActive: true } },
         class: true,
         parent: { include: { user: true } },
-        attendances: { take: 10, orderBy: { date: 'desc' } },
+        attendances: { take: 15, orderBy: { date: 'desc' } },
         marks: { include: { subject: true } },
+        payments: { orderBy: { dueDate: 'desc' } },
       },
     });
     if (!student) throw new NotFoundException('Student not found');
     return student;
   }
 
-    // 4. ተማሪ ማስተካከል
+  // 4. ተማሪ ማስተካከል / ክፍል ማዘዋወር (Enrollment / Class Assignment)
   async updateStudent(id: string, dto: UpdateStudentDto) {
     const existing = await this.prisma.student.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Student not found');
 
-    // የ Student ሞዴል መስኮች ብቻ
     const studentData: any = {};
     if (dto.studentCode) studentData.studentCode = dto.studentCode;
     if (dto.dateOfBirth) studentData.dateOfBirth = new Date(dto.dateOfBirth);
     if (dto.gender) studentData.gender = dto.gender;
-    if (dto.classId) studentData.classId = dto.classId;
-    if (dto.parentId) studentData.parentId = dto.parentId;
+    if (dto.classId !== undefined) studentData.classId = dto.classId;
+    if (dto.parentId !== undefined) studentData.parentId = dto.parentId;
 
-    // የ User ሞዴል መስኮች
     const userData: any = {};
     if (dto.fullName) userData.fullName = dto.fullName;
     if (dto.phone) userData.phone = dto.phone;
     if (dto.password) userData.passwordHash = await bcrypt.hash(dto.password, 10);
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Student ማዘመን (የ Student መስኮች ብቻ)
       if (Object.keys(studentData).length > 0) {
         await tx.student.update({
           where: { id },
@@ -113,7 +124,6 @@ export class StudentsService {
         });
       }
 
-      // 2. User ማዘመን (የ User መስኮች ብቻ)
       if (Object.keys(userData).length > 0) {
         await tx.user.update({
           where: { id: existing.userId },
@@ -121,15 +131,15 @@ export class StudentsService {
         });
       }
 
-      return { message: 'Student updated successfully', id };
+      return { message: 'Student enrollment updated successfully', id };
     });
   }
+
   // 5. ተማሪ ማጥፋት
   async removeStudent(id: string) {
     const existing = await this.prisma.student.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Student not found');
 
-    // User ን ስናጠፋ Student ፕሮፋይሉም በ Cascade ይጠፋል
     await this.prisma.user.delete({ where: { id: existing.userId } });
     return { message: 'Student deleted successfully' };
   }
