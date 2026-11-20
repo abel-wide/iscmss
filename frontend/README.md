@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💻 ISCMSS Frontend Application
 
-## Getting Started
+Next.js 16 modern client interface for the **Integrated School Community Management System (ISCMS)** built with React 19, Tailwind CSS v4, and accessible shadcn/ui components.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🛠️ Tech Stack
+- **Framework**: [Next.js](https://nextjs.org/) 16 (App Router + Turbopack)
+- **Library**: React 19
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4
+- **Component UI**: Accessible components inspired by shadcn/ui (`@base-ui/react`)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **API Client**: Axios with auto-injected JWT authentication bearer tokens
+
+---
+
+## 🧭 Routes & Role Access
+
+| Route | Role Access | Purpose |
+|---|---|---|
+| `/` | Public | Institutional landing page with mission, features, and quick links |
+| `/login` | Public | Portal authentication with 5-attempt security lockout and password reveal |
+| `/register` | Public | Self-registration for Parents & Students with live password strength meter |
+| `/forgot-password` | Public | 2-step password reset with 6-digit OTP verification code & instant lockout clear |
+| `/contact` | Public | School contact information and direct inquiry submission form |
+| `/about` & `/services` | Public | Institutional overview, school mission, and services breakdown |
+| `/admin` | `ADMIN` | Admin Dashboard: system KPIs, global search, and reminder dispatch |
+| `/admin/users` | `ADMIN` | Staff account creation (Head, Registrar, Admin) and parent-student linkage |
+| `/head` | `HEAD` | School Head Dashboard with direct links to 4 analytical executive reports |
+| `/head/reports/*` | `HEAD` | Attendance compliance, academic rankings, fee revenues, and teacher performance |
+| `/head/timetable` | `HEAD` | Class schedule management and automated timetable generator button |
+| `/head/announcements` | `HEAD` | Publish institutional announcements targeting teachers, parents, or students |
+| `/registrar` | `REGISTRAR` | Registrar Dashboard: student enrollment metrics and fee collection overview |
+| `/registrar/students` | `REGISTRAR` | Student registration, code generation, class assignment, and parent linking |
+| `/registrar/payments` | `REGISTRAR` | Tuition fee invoicing, overdue tracking with 5% penalties, and receipts |
+| `/teacher` | `TEACHER`, `ROOM_TEACHER` | Teacher Dashboard with Room-Teacher attendance policy notice |
+| `/teacher/attendance` | `ROOM_TEACHER` (or `ADMIN`) | Daily attendance marking (restricted strictly to assigned Room Teachers) |
+| `/teacher/grades` | `TEACHER` | Student assessment and final examination grade recording |
+| `/teacher/timetable` | `TEACHER` | Weekly teaching schedule view |
+| `/parent` | `PARENT` | Parent Portal: linked children overview, instant alerts, and fee status |
+| `/parent/payments` | `PARENT` | Digital fee payments, overdue penalty inspection, and official digital receipts |
+| `/student` | `STUDENT` | Student Portal: GPA, class rank, timetable, and attendance rate summary |
+| `/student/exams` | `STUDENT` | Objective MCQ examination interface with automated scoring and feedback |
+| `/student/grades` | `STUDENT` | Digital terminal report card with GPA, rank, and subject breakdown |
+| `/student/resources` | `STUDENT` | 24/7 Learning Hub: lesson notes, curriculum e-books, and video lessons |
+| `/chat` | `PARENT`, `TEACHER` | Real-time direct communication between parents and educators |
+
+---
+
+## 🚀 Setup & Execution
+
+### 1. Environment Configuration
+Create `.env.local` in `frontend/`:
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Build & Run
+```bash
+# Production build & start:
+npm run build
+npm run start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Development mode:
+npm run dev
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Application runs on: **`http://localhost:3000`**
