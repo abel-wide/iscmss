@@ -13,7 +13,18 @@ async function bootstrap() {
 
   // Validation
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        origin.includes('localhost') ||
+        origin.includes('vercel.app') ||
+        origin.includes('onrender.com') ||
+        (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
