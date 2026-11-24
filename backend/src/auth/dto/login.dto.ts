@@ -63,6 +63,10 @@ export class GoogleLoginDto {
 
   @IsString()
   @IsOptional()
+  password?: string;
+
+  @IsString()
+  @IsOptional()
   fullName?: string;
 
   @IsString()

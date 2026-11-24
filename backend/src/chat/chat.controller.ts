@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Request } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
@@ -6,6 +6,11 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(private chatService: ChatService) {}
+
+  @Get('contacts')
+  getContacts(@Request() req: any) {
+    return this.chatService.getContacts(req.user?.id || req.user?.sub);
+  }
 
   @Get(':user1Id/:user2Id')
   getConversation(@Param('user1Id') user1Id: string, @Param('user2Id') user2Id: string) {

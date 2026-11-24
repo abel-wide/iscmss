@@ -15,6 +15,22 @@ export class ChatService {
     });
   }
 
+  async getContacts(currentUserId?: string) {
+    return this.prisma.user.findMany({
+      where: {
+        ...(currentUserId ? { id: { not: currentUserId } } : {}),
+        isActive: true,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        role: true,
+        email: true,
+      },
+      orderBy: { fullName: 'asc' },
+    });
+  }
+
   async getConversation(user1Id: string, user2Id: string) {
     return this.prisma.message.findMany({
       where: {

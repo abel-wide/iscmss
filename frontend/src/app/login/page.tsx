@@ -52,6 +52,8 @@ export default function LoginPage() {
   // Google sign-in states
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleEmail, setGoogleEmail] = useState('');
+  const [googlePassword, setGooglePassword] = useState('');
+  const [showGooglePassword, setShowGooglePassword] = useState(false);
   const [googleName, setGoogleName] = useState('');
   const [googleRole, setGoogleRole] = useState<'PARENT' | 'STUDENT'>('PARENT');
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -99,7 +101,7 @@ export default function LoginPage() {
     }
   };
 
-  const executeGoogleLogin = async (targetEmail: string, targetName: string) => {
+  const executeGoogleLogin = async (targetEmail: string, targetName: string, targetPassword?: string) => {
     setGoogleError('');
     setGoogleLoading(true);
 
@@ -107,6 +109,7 @@ export default function LoginPage() {
       const res = await api.post('/auth/google', {
         email: targetEmail,
         fullName: targetName,
+        password: targetPassword,
         role: googleRole,
       });
 
@@ -118,7 +121,7 @@ export default function LoginPage() {
       navigateByRole(res.data.user.role);
     } catch (err: unknown) {
       const errorObj = err as { response?: { data?: { message?: string } } };
-      setGoogleError(errorObj.response?.data?.message || 'Google authentication failed. Please try again.');
+      setGoogleError(errorObj.response?.data?.message || 'Google authentication failed. Please check your credentials.');
     } finally {
       setGoogleLoading(false);
     }
@@ -130,7 +133,11 @@ export default function LoginPage() {
       setGoogleError('Please enter a valid Google account email.');
       return;
     }
-    executeGoogleLogin(googleEmail.trim(), googleName.trim());
+    if (!googlePassword.trim()) {
+      setGoogleError('Please enter your password.');
+      return;
+    }
+    executeGoogleLogin(googleEmail.trim(), googleName.trim(), googlePassword.trim());
   };
 
   return (
@@ -279,7 +286,7 @@ export default function LoginPage() {
               Sign in with Google
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-500">
-              Choose an account to continue to ISCMS School Management
+              Enter your Google account email and password to continue to ISCMS
             </DialogDescription>
           </DialogHeader>
 
@@ -289,138 +296,99 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="space-y-4 pt-2">
-            {/* Quick Demo Google Accounts */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Quick Sign-in with Demo Google Account:
+          <form onSubmit={handleCustomGoogleSubmit} className="space-y-3.5 pt-2">
+            <div>
+              <Label htmlFor="google-email-input" className="text-xs font-semibold text-slate-700">
+                Google Email Address
               </Label>
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  disabled={googleLoading}
-                  onClick={() => executeGoogleLogin('almaz.parent.google@gmail.com', 'Almaz Tefera')}
-                  className="w-full p-3 border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 rounded-xl flex items-center justify-between text-left transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm">
-                      A
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900 group-hover:text-blue-700">
-                        Almaz Tefera
-                      </p>
-                      <p className="text-xs text-slate-500">almaz.parent.google@gmail.com</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                    Parent
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={googleLoading}
-                  onClick={() => executeGoogleLogin('samuel.student.google@gmail.com', 'Samuel Dawit')}
-                  className="w-full p-3 border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 rounded-xl flex items-center justify-between text-left transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-sm">
-                      S
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900 group-hover:text-purple-700">
-                        Samuel Dawit
-                      </p>
-                      <p className="text-xs text-slate-500">samuel.student.google@gmail.com</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-100 text-purple-800">
-                    Student
-                  </span>
-                </button>
-              </div>
+              <Input
+                id="google-email-input"
+                type="email"
+                placeholder="yourname@gmail.com"
+                value={googleEmail}
+                onChange={(e) => setGoogleEmail(e.target.value)}
+                required
+                className="mt-1 text-sm"
+              />
             </div>
 
-            {/* Divider */}
-            <div className="relative flex py-1 items-center">
-              <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-3 text-xs uppercase font-medium text-slate-400">
-                Or use another Google account
-              </span>
-              <div className="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            {/* Custom Google Account Form */}
-            <form onSubmit={handleCustomGoogleSubmit} className="space-y-3">
-              <div>
-                <Label htmlFor="google-email-input" className="text-xs font-medium text-slate-700">
-                  Google Email Address
-                </Label>
+            <div>
+              <Label htmlFor="google-password-input" className="text-xs font-semibold text-slate-700">
+                Password
+              </Label>
+              <div className="relative mt-1">
                 <Input
-                  id="google-email-input"
-                  type="email"
-                  placeholder="yourname@gmail.com"
-                  value={googleEmail}
-                  onChange={(e) => setGoogleEmail(e.target.value)}
+                  id="google-password-input"
+                  type={showGooglePassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={googlePassword}
+                  onChange={(e) => setGooglePassword(e.target.value)}
                   required
-                  className="mt-1 text-sm"
+                  className="pr-10 text-sm"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowGooglePassword(!showGooglePassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition p-1"
+                  tabIndex={-1}
+                >
+                  {showGooglePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+            </div>
 
-              <div>
-                <Label htmlFor="google-name-input" className="text-xs font-medium text-slate-700">
-                  Full Name
-                </Label>
-                <Input
-                  id="google-name-input"
-                  type="text"
-                  placeholder="e.g. Abebe Kebede"
-                  value={googleName}
-                  onChange={(e) => setGoogleName(e.target.value)}
-                  className="mt-1 text-sm"
-                />
+            <div>
+              <Label htmlFor="google-name-input" className="text-xs font-semibold text-slate-700">
+                Full Name (optional for new account)
+              </Label>
+              <Input
+                id="google-name-input"
+                type="text"
+                placeholder="e.g. Abebe Kebede"
+                value={googleName}
+                onChange={(e) => setGoogleName(e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-slate-700 block mb-1">
+                Role (if creating a new account):
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGoogleRole('PARENT')}
+                  className={`py-2 text-xs font-semibold rounded-lg border transition ${
+                    googleRole === 'PARENT'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  Parent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGoogleRole('STUDENT')}
+                  className={`py-2 text-xs font-semibold rounded-lg border transition ${
+                    googleRole === 'STUDENT'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  Student
+                </button>
               </div>
+            </div>
 
-              <div>
-                <Label className="text-xs font-medium text-slate-700 block mb-1">
-                  Default Role for New Account:
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setGoogleRole('PARENT')}
-                    className={`py-2 text-xs font-semibold rounded-lg border transition ${
-                      googleRole === 'PARENT'
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    Parent
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGoogleRole('STUDENT')}
-                    className={`py-2 text-xs font-semibold rounded-lg border transition ${
-                      googleRole === 'STUDENT'
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    Student
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white mt-2"
-                disabled={googleLoading}
-              >
-                {googleLoading ? 'Signing in with Google...' : 'Continue to Account'}
-              </Button>
-            </form>
-          </div>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 font-semibold mt-2"
+              disabled={googleLoading}
+            >
+              {googleLoading ? 'Authenticating with Google...' : 'Sign In with Google'}
+            </Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

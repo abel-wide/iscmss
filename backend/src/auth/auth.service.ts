@@ -115,8 +115,8 @@ export class AuthService {
     if (!user) {
       // Auto-provision user account from Google
       const fullName = dto.fullName?.trim() || email.split('@')[0];
-      const randomPassword = `Ggl#${Math.random().toString(36).substring(2, 10)}!${Date.now()}`;
-      const passwordHash = await bcrypt.hash(randomPassword, 10);
+      const pwd = dto.password?.trim() || `Ggl#${Math.random().toString(36).substring(2, 10)}!${Date.now()}`;
+      const passwordHash = await bcrypt.hash(pwd, 10);
       const allowedRoles: Role[] = [Role.PARENT, Role.STUDENT];
       const assignedRole = dto.role && allowedRoles.includes(dto.role) ? dto.role : Role.PARENT;
 
@@ -159,6 +159,14 @@ export class AuthService {
           `Account is temporarily locked. Please try again in ${minutesLeft} minute(s).`,
         );
       }
+
+      if (dto.password && dto.password.trim()) {
+        const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
+        if (!isMatch) {
+          throw new UnauthorizedException('Incorrect password for this Google account.');
+        }
+      }
+
       if (user.loginAttempts > 0 || user.lockoutUntil) {
         await this.prisma.user.update({
           where: { id: user.id },
