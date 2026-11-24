@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseUUIDPipe, Query, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { GradesService } from './grades.service';
 import { CreateMarkDto } from './dto/create-mark.dto';
@@ -17,8 +17,8 @@ export class GradesController {
 
   @Post()
   @Roles(Role.TEACHER, Role.ROOM_TEACHER, Role.ADMIN)
-  createMark(@Body() dto: CreateMarkDto) {
-    return this.gradesService.createMark(dto);
+  createMark(@Body() dto: CreateMarkDto, @Request() req: any) {
+    return this.gradesService.createMark(dto, req.user?.id);
   }
 
   @Get()

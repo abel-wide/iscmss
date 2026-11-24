@@ -32,8 +32,28 @@ export class GradesService {
     }
   }
 
-  // 1. አዲስ ውጤት መመዝገብ
-  async createMark(dto: CreateMarkDto) {
+  // 1. አዲስ ውጤት መመዝገብ ወይም ማዘመን (Add or Update Mark)
+  async createMark(dto: CreateMarkDto, currentUserId?: string) {
+    let teacherId = dto.teacherId;
+    if (!teacherId && currentUserId) {
+      const teacher = await this.prisma.teacher.findUnique({
+        where: { userId: currentUserId },
+      });
+      if (teacher) {
+        teacherId = teacher.id;
+      }
+    }
+    if (!teacherId) {
+      const firstTeacher = await this.prisma.teacher.findFirst();
+      if (firstTeacher) {
+        teacherId = firstTeacher.id;
+      } else {
+        throw new NotFoundException('No teacher record found to associate with mark.');
+      }
+    }
+
+    const total = dto.assessment + dto.finalExam;
+
     const existing = await this.prisma.mark.findUnique({
       where: {
         studentId_subjectId: {
@@ -44,16 +64,32 @@ export class GradesService {
     });
 
     if (existing) {
-      throw new ConflictException('Mark already exists for this student and subject');
-    }
+      const updated = await this.prisma.mark.update({
+        where: { id: existing.id },
+        data: {
+          assessment: dto.assessment,
+          finalExam: dto.finalExam,
+          total,
+          teacherId,
+        },
+        include: {
+          student: { include: { user: { select: { fullName: true } } } },
+          subject: { select: { name: true, code: true } },
+          teacher: { include: { user: { select: { fullName: true } } } },
+        },
+      });
 
-    const total = dto.assessment + dto.finalExam;
+      if (updated.subject?.name) {
+        await this.notifyParentOnGrade(dto.studentId, updated.subject.name, total);
+      }
+      return updated;
+    }
 
     const mark = await this.prisma.mark.create({
       data: {
         studentId: dto.studentId,
         subjectId: dto.subjectId,
-        teacherId: dto.teacherId,
+        teacherId,
         assessment: dto.assessment,
         finalExam: dto.finalExam,
         total: total,

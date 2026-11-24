@@ -17,6 +17,7 @@ import { TimetableModule } from './timetable/timetable.module';
 import { ReportsModule } from './reports/reports.module';
 import { SearchModule } from './search/search.module';
 import { ExamsModule } from './exams/exams.module';
+import { SubjectsModule } from './subjects/subjects.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ExamsModule } from './exams/exams.module';
     ReportsModule,
     SearchModule,
     ExamsModule,
+    SubjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

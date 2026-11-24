@@ -46,7 +46,7 @@ const QUICK_LINKS = [
   { label: 'Grades', icon: BookOpen, path: '/parent/grades', color: 'text-green-600 bg-green-50' },
   { label: 'Attendance', icon: ClipboardList, path: '/parent/attendance', color: 'text-purple-600 bg-purple-50' },
   { label: 'Resources', icon: FolderOpen, path: '/parent/resources', color: 'text-orange-600 bg-orange-50' },
-  { label: 'Chat', icon: MessageSquare, path: '/parent/chat', color: 'text-pink-600 bg-pink-50' },
+  { label: 'Chat', icon: MessageSquare, path: '/chat', color: 'text-pink-600 bg-pink-50' },
 ];
 
 export default function ParentDashboard() {

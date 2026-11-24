@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsUUID, Max, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMarkDto {
@@ -12,10 +12,10 @@ export class CreateMarkDto {
   @IsNotEmpty()
   subjectId: string;
 
-  @ApiProperty({ description: 'Teacher ID' })
+  @ApiProperty({ description: 'Teacher ID', required: false })
   @IsUUID()
-  @IsNotEmpty()
-  teacherId: string;
+  @IsOptional()
+  teacherId?: string;
 
   @ApiProperty({ example: 35, description: 'Assessment mark (0-40)' })
   @IsNumber()
