@@ -120,7 +120,7 @@ export default function ParentPaymentsPage() {
               <CardTitle className="text-sm text-slate-600">Total Paid</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-green-600">${totalPaid.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-green-600">{totalPaid.toFixed(2)} Birr</p>
             </CardContent>
           </Card>
           <Card className="border-l-4 border-l-red-400">
@@ -128,7 +128,7 @@ export default function ParentPaymentsPage() {
               <CardTitle className="text-sm text-slate-600">Total Due</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-red-500">${totalPending.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-red-500">{totalPending.toFixed(2)} Birr</p>
             </CardContent>
           </Card>
         </div>
@@ -155,7 +155,7 @@ export default function ParentPaymentsPage() {
                   {payments.map((p) => (
                     <tr key={p.id} className="border-b hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-medium">{getStudentName(p)}</td>
-                      <td className="p-4">${p.amount.toFixed(2)}</td>
+                      <td className="p-4">{p.amount.toFixed(2)} Birr</td>
                       <td className="p-4 text-slate-500">
                         {new Date(p.dueDate).toLocaleDateString()}
                       </td>
@@ -166,13 +166,13 @@ export default function ParentPaymentsPage() {
                       </td>
                       <td className="p-4">
                         {p.status === 'OVERDUE' && p.penalty ? (
-                          <span className="text-red-600 font-medium">+${p.penalty.toFixed(2)}</span>
+                          <span className="text-red-600 font-medium">+{p.penalty.toFixed(2)} Birr</span>
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
                       <td className="p-4 font-semibold">
-                        ${(p.totalDue ?? p.amount).toFixed(2)}
+                        {(p.totalDue ?? p.amount).toFixed(2)} Birr
                       </td>
                       <td className="p-4 text-slate-500">
                         {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}
@@ -228,7 +228,7 @@ export default function ParentPaymentsPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Amount Paid</span>
-                  <span className="font-semibold text-green-600">${receipt.amount.toFixed(2)}</span>
+                  <span className="font-semibold text-green-600">{receipt.amount.toFixed(2)} Birr</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Date Paid</span>

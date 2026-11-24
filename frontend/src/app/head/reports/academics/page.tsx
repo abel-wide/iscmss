@@ -65,7 +65,7 @@ export default function HeadAcademicsReportPage() {
     }
     try {
       const user = JSON.parse(userStr);
-      if (user.role !== 'HEAD') {
+      if (user.role !== 'HEAD' && user.role !== 'ADMIN') {
         router.push('/login');
         return;
       }

@@ -189,7 +189,7 @@ export default function RegistrarPaymentsPage() {
   };
 
   const fmt = (n?: number) =>
-    n !== undefined ? `$${n.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—';
+    n !== undefined ? `${n.toLocaleString(undefined, { minimumFractionDigits: 2 })} Birr` : '—';
 
   const fmtDate = (d?: string) => (d ? new Date(d).toLocaleDateString() : '—');
 

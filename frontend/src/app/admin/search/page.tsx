@@ -208,7 +208,7 @@ function SearchContent() {
                     <Card key={p.id} className="shadow-sm border-slate-200">
                       <CardContent className="p-4 space-y-1">
                         <p className="font-bold text-slate-900">{p.student?.user?.fullName || 'Student'}</p>
-                        <p className="text-xs text-slate-500">Amount: ${p.amount}</p>
+                        <p className="text-xs text-slate-500">Amount: {p.amount} Birr</p>
                         <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 uppercase">
                           {p.status}
                         </span>

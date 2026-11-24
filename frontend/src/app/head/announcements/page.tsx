@@ -70,7 +70,7 @@ export default function AnnouncementsPage() {
     const userData = localStorage.getItem('user');
     if (!token || !userData) { router.push('/login'); return; }
     const parsed = JSON.parse(userData);
-    if (parsed.role !== 'HEAD') { router.push('/login'); return; }
+    if (parsed.role !== 'HEAD' && parsed.role !== 'ADMIN') { router.push('/login'); return; }
     fetchAnnouncements();
   }, [router]);
 

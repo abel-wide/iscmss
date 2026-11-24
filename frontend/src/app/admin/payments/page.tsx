@@ -268,7 +268,7 @@ export default function AdminPaymentsPage() {
               <CardTitle className="text-xs font-medium text-slate-500 uppercase">Total Invoiced</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-slate-900">${totalAmount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-slate-900">{totalAmount.toLocaleString()} Birr</p>
             </CardContent>
           </Card>
 
@@ -277,7 +277,7 @@ export default function AdminPaymentsPage() {
               <CardTitle className="text-xs font-medium text-emerald-600 uppercase">Total Collected</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-emerald-600">${totalPaid.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-emerald-600">{totalPaid.toLocaleString()} Birr</p>
             </CardContent>
           </Card>
 
@@ -286,7 +286,7 @@ export default function AdminPaymentsPage() {
               <CardTitle className="text-xs font-medium text-amber-600 uppercase">Pending</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-amber-600">${totalPending.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-amber-600">{totalPending.toLocaleString()} Birr</p>
             </CardContent>
           </Card>
 
@@ -295,7 +295,7 @@ export default function AdminPaymentsPage() {
               <CardTitle className="text-xs font-medium text-red-600 uppercase">Overdue (+5% Penalty)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-red-600">${totalOverdue.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-red-600">{totalOverdue.toLocaleString()} Birr</p>
             </CardContent>
           </Card>
         </div>
@@ -359,7 +359,7 @@ export default function AdminPaymentsPage() {
                             <div>{studentName}</div>
                             {studentCode && <div className="text-xs text-slate-400">{studentCode}</div>}
                           </TableCell>
-                          <TableCell className="text-slate-800 font-semibold">${p.amount?.toFixed(2)}</TableCell>
+                          <TableCell className="text-slate-800 font-semibold">{p.amount?.toFixed(2)} Birr</TableCell>
                           <TableCell className="text-slate-600 text-sm">
                             {p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '—'}
                           </TableCell>
@@ -373,10 +373,10 @@ export default function AdminPaymentsPage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-red-600 text-sm font-medium">
-                            {p.penalty && p.penalty > 0 ? `+$${p.penalty.toFixed(2)}` : '—'}
+                            {p.penalty && p.penalty > 0 ? `+${p.penalty.toFixed(2)} Birr` : '—'}
                           </TableCell>
                           <TableCell className="text-slate-900 font-bold">
-                            ${(p.totalDue ?? p.amount)?.toFixed(2)}
+                            {(p.totalDue ?? p.amount)?.toFixed(2)} Birr
                           </TableCell>
                           <TableCell className="text-right">
                             {p.status === 'PAID' ? (
@@ -490,7 +490,7 @@ export default function AdminPaymentsPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Amount Paid:</span>
-                <span className="font-bold text-emerald-600">${receiptData.amount?.toFixed(2)}</span>
+                <span className="font-bold text-emerald-600">{receiptData.amount?.toFixed(2)} Birr</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Payment Date:</span>

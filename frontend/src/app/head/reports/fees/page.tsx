@@ -40,7 +40,7 @@ interface FeesData {
 }
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  return `${amount.toLocaleString()} Birr`;
 }
 
 export default function HeadFeesReportPage() {
@@ -58,7 +58,7 @@ export default function HeadFeesReportPage() {
     }
     try {
       const user = JSON.parse(userStr);
-      if (user.role !== 'HEAD') {
+      if (user.role !== 'HEAD' && user.role !== 'ADMIN') {
         router.push('/login');
         return;
       }
