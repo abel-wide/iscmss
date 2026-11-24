@@ -55,3 +55,21 @@ export class ResetPasswordDto {
   @Matches(STRONG_PASSWORD_REGEX, { message: STRONG_PASSWORD_MESSAGE })
   newPassword: string;
 }
+
+export class GoogleLoginDto {
+  @IsEmail({}, { message: 'Please provide a valid Google email address' })
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsOptional()
+  fullName?: string;
+
+  @IsString()
+  @IsOptional()
+  credential?: string;
+
+  @IsEnum(Role)
+  @IsOptional()
+  role?: Role;
+}

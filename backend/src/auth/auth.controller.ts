@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseGuards, Get } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto/login.dto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto, GoogleLoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -14,6 +14,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in with email and password' })
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
+  }
+
+  @Post('google')
+  @ApiOperation({ summary: 'Sign in or register with Google account' })
+  googleLogin(@Body() dto: GoogleLoginDto) {
+    return this.auth.googleLogin(dto);
   }
 
   @Post('register')

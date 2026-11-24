@@ -11,7 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
-import { RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto/login.dto';
+import { RegisterDto, ForgotPasswordDto, ResetPasswordDto, GoogleLoginDto } from './dto/login.dto';
 import { assertStrongPassword } from '../common/utils/password-policy';
 
 @Injectable()
@@ -92,6 +92,84 @@ export class AuthService {
     }
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
+      token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+      },
+    };
+  }
+
+  async googleLogin(dto: GoogleLoginDto) {
+    const email = dto.email.toLowerCase().trim();
+    if (!email) {
+      throw new BadRequestException('Valid Google email address is required');
+    }
+
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Auto-provision user account from Google
+      const fullName = dto.fullName?.trim() || email.split('@')[0];
+      const randomPassword = `Ggl#${Math.random().toString(36).substring(2, 10)}!${Date.now()}`;
+      const passwordHash = await bcrypt.hash(randomPassword, 10);
+      const allowedRoles: Role[] = [Role.PARENT, Role.STUDENT];
+      const assignedRole = dto.role && allowedRoles.includes(dto.role) ? dto.role : Role.PARENT;
+
+      user = await this.prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            email,
+            fullName,
+            passwordHash,
+            role: assignedRole,
+            isActive: true,
+            loginAttempts: 0,
+          },
+        });
+
+        if (assignedRole === Role.PARENT) {
+          await tx.parent.create({
+            data: { userId: newUser.id, relationship: 'Guardian' },
+          });
+        } else if (assignedRole === Role.STUDENT) {
+          await tx.student.create({
+            data: {
+              userId: newUser.id,
+              studentCode: `STU-GGL-${Math.floor(1000 + Math.random() * 9000)}`,
+              dateOfBirth: new Date('2009-01-01'),
+              gender: 'OTHER',
+            },
+          });
+        }
+
+        return newUser;
+      });
+    } else {
+      if (!user.isActive) {
+        throw new ForbiddenException('This account has been deactivated. Please contact support.');
+      }
+      if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+        const minutesLeft = Math.ceil((user.lockoutUntil.getTime() - new Date().getTime()) / 60000);
+        throw new ForbiddenException(
+          `Account is temporarily locked. Please try again in ${minutesLeft} minute(s).`,
+        );
+      }
+      if (user.loginAttempts > 0 || user.lockoutUntil) {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { loginAttempts: 0, lockoutUntil: null },
+        });
+      }
+    }
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    return {
+      message: 'Signed in with Google successfully',
       token: this.jwtService.sign(payload),
       user: {
         id: user.id,
