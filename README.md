@@ -1,5 +1,4 @@
-# 🎓 ISCMSS — International Smart Campus Management School System
-### Integrated School Community Management System (ISCMS)
+# 🎓 ISCMSS — Integrated School Community Management Systems
 
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2016%20(React%2019)-black?logo=next.js)](https://nextjs.org/)
 [![NestJS](https://img.shields.io/badge/Backend-NestJS%2012-E0234E?logo=nestjs)](https://nestjs.com/)
